@@ -123,7 +123,8 @@ UnicornState::UnicornState()
   odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &UnicornState::odomCallback, this);
   acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &UnicornState::accGoalServer, this);
   bumper_sub_ = n_.subscribe("rearBumper",0, &UnicornState::bumperCallback, this);
-  point_Clicked_sub = n_.subscribe("clicked_point",&UnicornState::clicked_PointCallBack, this); //testing
+  point_Clicked_sub = n_.subscribe("clicked_point",0,&UnicornState::clickedPointCallBack, this); //testing
+  
 
   if(sim_time)
   {
@@ -212,7 +213,7 @@ std::string UnicornState::stateToString(int state)
 		return "EXITING";
 
 		//test here
-		case current_state::WAYPOINT
+		case current_state::WAYPOINT:
 		return "WAYPOINT";
 
 		default:
@@ -744,14 +745,17 @@ void UnicornState::lift()
 	ROS_INFO("[unicorn_statemachine] send lift signal %d",lift_.data);
 	lift_pub_.publish(lift_);
 }
-void UnicornState::clicked_PointCallBack(const geometry_msgs::PointStamped& msg)  //Subscribe to topic /clicked_point
+void UnicornState::clickedPointCallBack(const geometry_msgs::PointStamped& msg)  //Subscribe to topic /clicked_point
 {
-	
+	ROS_INFO("VI HAR KOMMIT IN HIT!!!");
+	ROS_INFO("KOMSI KOMIS");
 	point_goalX = msg.point.x + transform.getOrigin().x();  //Point is a geometry_msg::Point
 	point_goalY = msg.point.y + transform.getOrigin().y();
+	ROS_INFO("Values in X: %f",point_goalX);
+	ROS_INFO("Values in Y: %f",point_goalY);
 	//point_goalZ = msg.point.z + transform.getOrigin().z();
-	point.reserve(4);
-	rvizWPmaker(&point_goalX, &point_goalY);
+	//point.reserve(4);
+	rvizWPmaker(point_goalX, point_goalY);
 }
 void UnicornState::rvizWPmaker(double& posX, double& posY)  //Store values into the geometry_msg::Point vector (4)
 {
@@ -762,19 +766,24 @@ void UnicornState::rvizWPmaker(double& posX, double& posY)  //Store values into 
 	//temp.z = posZ;
 	point.push_back(temp);
 	//Debugging purpose
+
 	for(int i=0; i<point.size(); i++) //Increases the size of the vector with 1 each time I call this command. maximum 5 elements, 0 counts.
 	{
-  		std::cout << point[i].x << "elements in the vector x" << point[i].y << "elements in y " << endl;
+  		std::cout << point[i].x << " elements in the vector x" << point[i].y << " elements in y " << std::endl;
   	}
-
+  	if(point.size() == 4)
+  	{
+  		pathCreator();
+  	}
 }
 void UnicornState::pathCreator()  
 {
 	//ros::Rate r(10);  //10Hz
 	move_base_msgs::MoveBaseGoal goal;
 	
-	if (point.size() == 4)  //Only if 4 waypoints are acquired, do the path.
-	{
+	//if (point.size() == 4)  //Only if 4 waypoints are acquired, do the path.
+	//{
+		ROS_INFO("Kommit in nu efter 4 element");
 		for (const auto& p:point)  //
 		{
 			std::cout<<"point element x: "<<p.x<<std::endl;
@@ -796,13 +805,21 @@ void UnicornState::pathCreator()
 			}
 
 
-		//while(sqrt(pow(goal.target_pose.pose.position.x-current_posX_,2)-pow(goal.target_pose.pose.position.y-current_posY_,2))) {
-			//r.sleep();
-			//ros::Duration(0.01).sleep(); // sleep for half a second
+		// //while(sqrt(pow(goal.target_pose.pose.position.x-current_posX_,2)-pow(goal.target_pose.pose.position.y-current_posY_,2))) {
+		// 	//r.sleep();
+		// 	//ros::Duration(0.01).sleep(); // sleep for half a second
 		}
-	}	
+
+	//}	
 		
 }
+//void UnicornState::pathClear()  //Just a function for clearing the path.
+//{
+//	if(point.size==4){
+//		point.clear();
+//	}
+//}
+
 //void UnicornState::testDrive()
 //{
 

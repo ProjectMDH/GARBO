@@ -13,6 +13,7 @@
 #include <std_srvs/Empty.h>
 #include <actionlib_msgs/GoalID.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/PointStamped.h>  //Testing
 #include <nav_msgs/Odometry.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
@@ -171,6 +172,10 @@ public:
 
 	bool accGoalServer(unicorn::CharlieCmd::Request  &req,
          unicorn::CharlieCmd::Response &res);
+	/*test functions below*/
+	void clicked_PointCallBack(const geometry_msgs::PointStamped& msg);
+	void rvizWPmaker(double& posX, double& posY);
+	void pathCreator();
 private:
 	ros::NodeHandle n_;
 	ros::Publisher cmd_vel_pub_;
@@ -204,8 +209,12 @@ private:
 	float target_yaw_;
 	bool holdingBin_; // if a bin is on Chalie, true else false
 
-	
-	
+	//testing here
+	std::vector<geometry_msgs::Point> point(4);
+	ros::Subscriber point_Clicked_sub;
+	double point_goalX;
+	double point_goalY;
+	// end of test variables above.
 	std::map<std::string, RangeSensor*> range_sensor_list_; /**< List of active rangesensors */
 	
 	

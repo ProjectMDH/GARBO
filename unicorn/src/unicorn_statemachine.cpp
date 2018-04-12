@@ -123,6 +123,7 @@ UnicornState::UnicornState()
   odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &UnicornState::odomCallback, this);
   acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &UnicornState::accGoalServer, this);
   bumper_sub_ = n_.subscribe("rearBumper",0, &UnicornState::bumperCallback, this);
+  point_Clicked_sub = n_.subscribe("clicked_point",&UnicornState::clicked_PointCallBack, this); //testing
 
   if(sim_time)
   {
@@ -209,6 +210,10 @@ std::string UnicornState::stateToString(int state)
 
 		case current_state::EXITING:
 		return "EXITING";
+
+		//test here
+		case current_state::WAYPOINT
+		return "WAYPOINT";
 
 		default:
 		return "INVALID STATE";
@@ -738,4 +743,67 @@ void UnicornState::lift()
 	}
 	ROS_INFO("[unicorn_statemachine] send lift signal %d",lift_.data);
 	lift_pub_.publish(lift_);
+}
+void UnicornState::clicked_PointCallBack(const geometry_msgs::PointStamped& msg)  //Subscribe to topic /clicked_point
+{
+	
+	point_goalX = msg.point.x + transform.getOrigin().x();  //Point is a geometry_msg::Point
+	point_goalY = msg.point.y + transform.getOrigin().y();
+	//point_goalZ = msg.point.z + transform.getOrigin().z();
+	point.reserve(4);
+	rvizWPmaker(&point_goalX, &point_goalY);
+}
+void UnicornState::rvizWPmaker(double& posX, double& posY)  //Store values into the geometry_msg::Point vector (4)
+{
+	int k = 0;
+	geometry_msgs::Point temp;
+	temp.x = posX;
+	temp.y = posY;
+	//temp.z = posZ;
+	point.push_back(temp);
+	//Debugging purpose
+	for(int i=0; i<point.size(); i++) //Increases the size of the vector with 1 each time I call this command. maximum 5 elements, 0 counts.
+	{
+  		std::cout << point[i].x << "elements in the vector x" << point[i].y << "elements in y " << endl;
+  	}
+
+}
+void UnicornState::pathCreator()  
+{
+	//ros::Rate r(10);  //10Hz
+	move_base_msgs::MoveBaseGoal goal;
+	goal.target_pose.header.frame_id = "map";
+	goal.target_pose.header.stamp = ros::Time::now();
+	if (point.size() == 4)  //Only if 4 waypoints are acquired, do the path.
+	{
+		for (const auto& p:point)  //
+		{
+			std::cout<<"point element x: "<<p.x<<std::endl;
+    		std::cout<<"point element y: "<<p.y<<std::endl;
+    	
+			goal.target_pose.pose.position.x = p.x;
+			goal.target_pose.pose.position.y = p.y;
+			goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(current_orientation_);
+			move_base_clt_.sendGoal(goal);
+			if(move_base_clt_.waitForResult() )
+			{
+				actionlib::SimpleClientGoalState state = move_base_clt_.getState();
+				ROS_INFO("Action finished: %s",state.toString().c_str());
+			}
+			else
+			{
+			ROS_INFO("Failed!")
+			}
+
+
+		//while(sqrt(pow(goal.target_pose.pose.position.x-current_posX_,2)-pow(goal.target_pose.pose.position.y-current_posY_,2))) {
+			//r.sleep();
+			//ros::Duration(0.01).sleep(); // sleep for half a second
+		}
+	}	
+		
+}
+void UnicornState::testDrive()
+{
+
 }

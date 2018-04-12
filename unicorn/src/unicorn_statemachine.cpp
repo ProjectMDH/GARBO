@@ -792,7 +792,7 @@ void UnicornState::pathCreator()
 			}
 			else
 			{
-			ROS_INFO("Failed!")
+			ROS_INFO("Failed with WP GOAL!");
 			}
 
 

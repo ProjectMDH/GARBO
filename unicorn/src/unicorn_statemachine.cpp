@@ -772,18 +772,18 @@ void UnicornState::pathCreator()
 {
 	//ros::Rate r(10);  //10Hz
 	move_base_msgs::MoveBaseGoal goal;
-	goal.target_pose.header.frame_id = "map";
-	goal.target_pose.header.stamp = ros::Time::now();
+	
 	if (point.size() == 4)  //Only if 4 waypoints are acquired, do the path.
 	{
 		for (const auto& p:point)  //
 		{
 			std::cout<<"point element x: "<<p.x<<std::endl;
     		std::cout<<"point element y: "<<p.y<<std::endl;
-    	
+    		goal.target_pose.header.frame_id = "map";
+			goal.target_pose.header.stamp = ros::Time::now();
 			goal.target_pose.pose.position.x = p.x;
 			goal.target_pose.pose.position.y = p.y;
-			goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(current_orientation_);
+			goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.1);
 			move_base_clt_.sendGoal(goal);
 			if(move_base_clt_.waitForResult() )
 			{

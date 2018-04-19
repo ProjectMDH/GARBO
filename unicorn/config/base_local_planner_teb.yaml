@@ -6,7 +6,7 @@
 # All velocities are m/s and angular velocities in rad/s
 
 recovery_behaviour_enabled: true
-controller_frequency: 5.0
+controller_frequency: 4.5
 
 # Global planner
 
@@ -120,6 +120,6 @@ TebLocalPlannerROS:
 cmd_angle_instead_rotvel: False
 min_samples: 3
 allow_init_with_backwards_motion: False
-inflation_dist: 5.0
+inflation_dist: 4
 viapoints_all_candidates: False
 global_plan_via_point_sep: -1.0 #Weight on following global path

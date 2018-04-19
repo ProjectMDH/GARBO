@@ -745,6 +745,7 @@ void UnicornState::lift()
 	ROS_INFO("[unicorn_statemachine] send lift signal %d",lift_.data);
 	lift_pub_.publish(lift_);
 }
+<<<<<<< Updated upstream
 void UnicornState::clickedPointCallBack(const geometry_msgs::PointStamped& msg)  //Subscribe to topic /clicked_point
 {
 	ROS_INFO("VI HAR KOMMIT IN HIT!!!");
@@ -824,3 +825,5 @@ void UnicornState::pathCreator()
 //{
 
 //}
+=======
+>>>>>>> Stashed changes
